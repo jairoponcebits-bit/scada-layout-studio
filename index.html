@@ -1,0 +1,2272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SCADA Layout Studio · 1920 × 1080 Landscape</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#131a22; --panel-2:#1a232d; --panel-3:#232e3a;
+    --border:#26313d; --border-2:#35424f;
+    --txt:#e6ecf2; --txt-2:#93a3b4; --txt-3:#5b6b7c;
+    --accent:#10b981; --accent-2:#34d399; --accent-d:#059669;
+    --danger:#ef4444; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--txt);overflow:hidden;
+    display:grid;grid-template-rows:52px 1fr 32px;height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  input,select{font:inherit;color:inherit}
+  kbd{display:inline-block;background:#0a0e13;border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:10px;color:var(--txt-2)}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#2c3a49;border-radius:5px;border:2px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:#3d4d5e;background-clip:content-box}
+
+  /* header */
+  .header{
+    display:flex;align-items:center;gap:12px;padding:0 14px;
+    background:linear-gradient(180deg,#141b24,#10161d);
+    border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{
+    width:30px;height:30px;border-radius:8px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#10b981,#059669);color:#04140b;
+    font-weight:800;font-size:15px;
+    box-shadow:0 4px 12px rgba(16,185,129,.35);
+  }
+  .brand-name{font-size:13.5px;font-weight:650;letter-spacing:-.15px}
+  .brand-tag{font-size:10px;color:var(--txt-3);letter-spacing:.06em;text-transform:uppercase}
+  .spacer{flex:1}
+  .hgroup{display:flex;align-items:stretch;border-radius:8px;overflow:hidden;background:var(--panel);border:1px solid var(--border)}
+  .hgroup button{padding:6px 12px;font-size:12px;font-weight:500;color:var(--txt-2);border-right:1px solid var(--border);transition:.12s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .hgroup button:last-child{border-right:none}
+  .hgroup button:hover:not(:disabled){background:var(--panel-2);color:var(--txt)}
+  .hgroup button.primary{background:linear-gradient(180deg,#10b981,#059669);color:#04140b;font-weight:600}
+  .hgroup button.primary:hover:not(:disabled){background:linear-gradient(180deg,#34d399,#10b981)}
+  .hgroup button.danger:hover:not(:disabled){background:#3b1d1d;color:#fca5a5}
+  .hgroup button .kbd-hint{font-size:9px;color:var(--txt-3);background:#0a0e13;border:1px solid var(--border);border-radius:3px;padding:0 3px;margin-left:2px}
+  .hgroup button:disabled .kbd-hint{opacity:.5}
+
+  /* main */
+  .main{display:grid;grid-template-columns:236px 1fr 272px;min-height:0}
+  .panel{background:var(--panel);display:flex;flex-direction:column;min-height:0}
+  .panel-left{border-right:1px solid var(--border)}
+  .panel-right{border-left:1px solid var(--border)}
+  .panel-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:11px 14px 9px;font-size:10.5px;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);
+    border-bottom:1px solid var(--border);flex-shrink:0;
+  }
+  .badge{background:var(--panel-3);color:var(--txt-2);font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;letter-spacing:0}
+  .panel-body{overflow-y:auto;min-height:0;flex:1}
+  .panel-foot{border-top:1px solid var(--border);padding:9px 12px;flex-shrink:0;font-size:10.5px;color:var(--txt-3);line-height:1.8}
+
+  /* assets */
+  .asset-list{padding:8px;display:flex;flex-direction:column;gap:6px}
+  .asset{
+    display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;
+    padding:7px 8px;border:1px solid transparent;border-radius:8px;
+    background:var(--panel-2);cursor:pointer;text-align:left;
+    transition:.13s;width:100%;
+  }
+  .asset:hover{background:var(--panel-3);border-color:var(--border-2);transform:translateY(-1px)}
+  .asset:active{transform:translateY(0)}
+  .asset-thumb{width:52px;height:42px;border-radius:5px;overflow:hidden;background:#0a1015;display:grid;place-items:center;border:1px solid #1a232d}
+  .asset-thumb img{max-width:100%;max-height:100%;display:block}
+  .asset-info{min-width:0}
+  .asset-tag{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;display:block}
+  .asset-name{font-size:11.5px;line-height:1.3;color:var(--txt);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  .palette-empty{padding:24px 14px;text-align:center;color:var(--txt-3);font-size:11.5px;line-height:1.9}
+  .palette-empty button{margin-top:10px;padding:6px 14px;border-radius:6px;background:var(--accent-d);color:#04140b;font-weight:600;font-size:11.5px}
+  .palette-empty button:hover{background:var(--accent)}
+
+  /* workspace */
+  .workspace{display:flex;flex-direction:column;min-height:0;background:radial-gradient(circle at 1px 1px,#1a222c 1px,transparent 0) 0 0/22px 22px,var(--bg)}
+  .toolbar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0}
+  .tool-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:11.5px;color:var(--txt-2);background:var(--panel-2);border:1px solid var(--border);transition:.12s}
+  .tool-btn:hover{background:var(--panel-3);color:var(--txt);border-color:var(--border-2)}
+  .tool-btn[aria-pressed="true"]{background:#0d2b20;border-color:#1a5c42;color:var(--accent-2)}
+  .tool-btn svg{width:13px;height:13px;flex-shrink:0}
+  .color-pick{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 9px;border-radius:6px;background:var(--panel-2);border:1px solid var(--border);font-size:11.5px;color:var(--txt-2);cursor:pointer}
+  .color-pick input{width:22px;height:22px;padding:0;border:1px solid var(--border-2);border-radius:4px;background:none;cursor:pointer}
+
+  .scroller{flex:1;overflow:auto;min-height:0;position:relative;padding:32px;scroll-behavior:auto}
+  .canvas-frame{
+    margin:0 auto;position:relative;
+    box-shadow:0 12px 48px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.03);
+    background:#fff;width:max-content;height:max-content;
+  }
+  #canvas{display:block;touch-action:none;user-select:none}
+  #canvas.panning, #canvas.panning *{cursor:grab !important}
+  #canvas.panning.panning-active, #canvas.panning.panning-active *{cursor:grabbing !important}
+
+  /* ── compact name tag ── */
+  #canvas .item-label{pointer-events:all;cursor:move;user-select:none}
+  #canvas .item-label .lbl-bg{
+    fill:#ffffff;stroke:#0d3b24;stroke-width:1.5;
+    vector-effect:non-scaling-stroke;transition:stroke .12s,stroke-width .12s;
+  }
+  #canvas .item-label .lbl-txt{
+    fill:#0d3b24;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
+    font-weight:800;letter-spacing:0;pointer-events:none;
+  }
+  #canvas .item-label:hover .lbl-bg{stroke:#10b981}
+  #canvas .item-label.sel .lbl-bg{stroke:#10b981;stroke-width:2.2}
+  #canvas .item-label.sel .lbl-txt{fill:#065f46}
+  #canvas .item-label.editing{opacity:0}
+
+  /* multi-select marquee visual */
+  #marquee-rect{fill:rgba(16,185,129,.12);stroke:#10b981;stroke-width:1.4;stroke-dasharray:5 3;vector-effect:non-scaling-stroke;pointer-events:none}
+
+  .canvas-hint{position:absolute;inset:32px;display:grid;place-items:center;pointer-events:none;color:var(--txt-3);font-size:12px;text-align:center;line-height:2.1;padding:20px}
+  .canvas-hint .big{font-size:36px;opacity:.35;margin-bottom:6px;display:block}
+  .canvas-hint button{pointer-events:auto;margin-top:12px;padding:8px 18px;border-radius:7px;background:var(--accent-d);color:#04140b;font-weight:600;font-size:12px;cursor:pointer}
+  .canvas-hint button:hover{background:var(--accent)}
+
+  .zoom-dock{position:absolute;right:22px;bottom:22px;z-index:5;display:flex;align-items:center;gap:2px;padding:4px;background:rgba(18,24,32,.94);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 28px rgba(0,0,0,.45);backdrop-filter:blur(8px)}
+  .zoom-dock button{padding:5px 9px;font-size:12px;color:var(--txt-2);border-radius:6px;transition:.12s;min-width:26px}
+  .zoom-dock button:hover{background:var(--panel-3);color:var(--txt)}
+  .zoom-val{font-size:11px;color:var(--txt-2);padding:0 8px;font-variant-numeric:tabular-nums;min-width:52px;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border);margin:0 2px;line-height:24px}
+
+  /* inspector */
+  .sec{border-bottom:1px solid var(--border)}
+  .sec:last-child{border-bottom:none}
+  .empty-insp{padding:28px 16px;text-align:center;color:var(--txt-3);font-size:11.5px;line-height:1.9}
+  .empty-insp .icon{font-size:26px;opacity:.35;margin-bottom:8px;display:block}
+  .insp-body{padding:12px;display:flex;flex-direction:column;gap:12px}
+
+  .sel-head{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;padding-bottom:11px;border-bottom:1px solid var(--border)}
+  .sel-thumb{width:44px;height:36px;border-radius:5px;background:#0a1015;display:grid;place-items:center;overflow:hidden;border:1px solid #1a232d}
+  .sel-thumb img{max-width:100%;max-height:100%}
+  .sel-thumb.multi{background:linear-gradient(135deg,#0d2b20,#1a5c42);color:#34d399;font-weight:800;font-size:15px}
+  .sel-name{font-size:12px;font-weight:600;line-height:1.35}
+  .sel-tag{font-size:9.5px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-3);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .field-label b{color:var(--accent-2);font-weight:700;letter-spacing:0;text-transform:none;font-size:11.5px}
+  .field-hint{font-size:10.5px;color:var(--txt-3);font-variant-numeric:tabular-nums}
+
+  input[type=number],input[type=text]{
+    background:var(--bg);border:1px solid var(--border);border-radius:6px;
+    padding:6px 9px;font-size:12px;width:100%;transition:.12s;font-variant-numeric:tabular-nums;
+  }
+  input[type=text]{font-family:ui-monospace,Consolas,monospace;letter-spacing:.4px;font-weight:800}
+  input[type=number]:hover,input[type=text]:hover{border-color:var(--border-2)}
+  input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p,0%),#263241 var(--p,0%))}
+  input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p,0%),#263241 var(--p,0%))}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-7px;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--accent)}
+
+  .btn-row{display:flex;gap:6px}
+  .btn-row button{flex:1;padding:7px 8px;border-radius:6px;font-size:11.5px;background:var(--panel-2);border:1px solid var(--border);color:var(--txt-2);transition:.12s;font-weight:500}
+  .btn-row button:hover{background:var(--panel-3);color:var(--txt);border-color:var(--border-2)}
+  .btn-row button.danger:hover{background:#3b1d1d;color:#fca5a5;border-color:#5a2a2a}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+  .label-panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px}
+  .label-panel .head{display:flex;align-items:center;justify-content:space-between;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-3);font-weight:700}
+  .label-panel .head .pill{background:#0d2b20;color:var(--accent-2);font-size:9.5px;padding:1px 6px;border-radius:8px;letter-spacing:0;text-transform:none;font-family:ui-monospace,Consolas,monospace;font-weight:800}
+
+  /* layers */
+  .layers{padding:8px;display:flex;flex-direction:column;gap:3px}
+  .layer{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;background:transparent;cursor:pointer;border:1px solid transparent;transition:.12s;font-size:11.5px;width:100%;text-align:left}
+  .layer:hover{background:var(--panel-2);border-color:var(--border)}
+  .layer.sel{background:#0e2a20;border-color:#1c6349}
+  .layer-idx{font-size:9.5px;color:var(--txt-3);font-variant-numeric:tabular-nums;width:16px;text-align:center;flex-shrink:0}
+  .layer.sel .layer-idx{color:var(--accent-2)}
+  .layer-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt-2)}
+  .layer.sel .layer-name{color:var(--txt);font-weight:500}
+  .layer-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;opacity:0}
+  .layer.sel .layer-dot{opacity:1}
+
+  /* status / footer */
+  .status{
+    display:flex;align-items:center;gap:16px;padding:0 14px;
+    background:#0d1219;border-top:1px solid var(--border);
+    font-size:11px;color:var(--txt-3);
+  }
+  .status .item{display:flex;align-items:center;gap:6px}
+  .status .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+  .status .credit{color:var(--txt-3);display:flex;align-items:center;gap:6px;font-size:11px}
+  .status .credit .heart{color:#ef4444;font-size:12px;line-height:1}
+  .status .credit b{color:var(--accent-2);font-weight:600;letter-spacing:.01em}
+  .status .sel-count{color:var(--accent-2);font-weight:600}
+
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(5,8,12,.9);backdrop-filter:blur(8px);display:grid;place-items:center;z-index:100;padding:24px}
+  .modal-card{max-width:500px;width:100%;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px 28px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+  .modal-icon{width:56px;height:56px;border-radius:14px;margin:0 auto 18px;display:grid;place-items:center;background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 8px 24px rgba(16,185,129,.35)}
+  .modal-icon svg{width:28px;height:28px;color:#04140b}
+  .modal-card h2{font-size:17px;font-weight:600;margin-bottom:8px;letter-spacing:-.2px}
+  .modal-card p{color:var(--txt-2);font-size:12.5px;line-height:1.75;margin-bottom:22px}
+  .modal-card p code{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:"SF Mono",Consolas,monospace;font-size:11px;color:var(--accent-2)}
+  .drop-zone{border:1.5px dashed var(--border-2);border-radius:10px;padding:26px 18px;margin-bottom:16px;transition:.15s;background:var(--bg);cursor:pointer}
+  .drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:#0d2b20}
+  .drop-zone .dz-icon{font-size:26px;opacity:.5;margin-bottom:8px;display:block}
+  .drop-zone p{margin:0;font-size:11.5px;color:var(--txt-3)}
+  .drop-zone .dz-tag{font-size:12.5px;color:var(--txt-2);font-weight:500;margin-bottom:4px;display:block}
+  .modal-actions{display:flex;gap:8px;justify-content:center}
+  .modal-actions button{padding:8px 18px;border-radius:7px;font-size:12.5px;font-weight:500;background:var(--panel-2);border:1px solid var(--border);color:var(--txt-2);transition:.12s}
+  .modal-actions button:hover{background:var(--panel-3);color:var(--txt)}
+  .modal-actions button.primary{background:linear-gradient(180deg,#10b981,#059669);color:#04140b;border-color:#0b7a55;font-weight:600}
+  .modal-actions button.primary:hover{background:linear-gradient(180deg,#34d399,#10b981)}
+  .modal-err{color:#fca5a5;font-size:11.5px;margin-top:14px;min-height:16px}
+
+  .hidden{display:none !important}
+
+  .warn-chip{display:flex;align-items:center;gap:6px;font-size:11px;color:#fcd34d;background:#3a2c0a;border:1px solid #6b5210;padding:3px 9px;border-radius:12px;white-space:nowrap}
+  .warn-chip svg{width:12px;height:12px;flex-shrink:0}
+
+  .hint-chip{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--txt-3);background:var(--panel-2);border:1px solid var(--border);padding:3px 8px;border-radius:8px}
+  .hint-chip b{color:var(--accent-2);font-weight:700}
+
+  @media (max-width:1100px){.main{grid-template-columns:200px 1fr 240px}}
+  @media (max-width:900px){.main{grid-template-columns:1fr}.panel-left,.panel-right{display:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+    <symbol id="i-magnet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v7a6 6 0 0 0 12 0V4"/><path d="M6 9h4M14 9h4"/><line x1="6" y1="4" x2="10" y2="4"/><line x1="14" y1="4" x2="18" y2="4"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></symbol>
+  </defs>
+</svg>
+
+<header class="header">
+  <div class="brand">
+    <div class="logo">S</div>
+    <div>
+      <div class="brand-name">SCADA Layout Studio</div>
+      <div class="brand-tag">Landscape 1920 × 1080</div>
+    </div>
+  </div>
+  <span id="warn-chip" class="warn-chip hidden">
+    <svg><use href="#i-warn"/></svg><span id="warn-text"></span>
+  </span>
+  <span class="hint-chip" title="Ctrl/⌘ + scroll to zoom · Alt + drag to pan">
+    <b>⌘+scroll</b> zoom · <b>Alt+drag</b> pan · <b>drag</b> marquee
+  </span>
+  <div class="spacer"></div>
+  <div class="hgroup" style="margin-right:6px">
+    <button id="btn-load-file">Load scada_mixers.html</button>
+  </div>
+  <div class="hgroup" style="margin-right:6px">
+    <button id="btn-undo" title="Undo (Ctrl+Z)" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" style="width:13px;height:13px"><use href="#i-undo"/></svg>
+      Undo
+    </button>
+    <button id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" style="width:13px;height:13px"><use href="#i-redo"/></svg>
+      Redo
+    </button>
+  </div>
+  <div class="hgroup" style="margin-right:6px">
+    <button id="btn-save">Save</button>
+    <button id="btn-open">Open</button>
+    <button id="btn-clear" class="danger">Clear</button>
+  </div>
+  <div class="hgroup">
+    <button id="btn-svg" class="primary">Export SVG</button>
+    <button id="btn-png">PNG</button>
+  </div>
+</header>
+
+<main class="main">
+  <aside class="panel panel-left">
+    <div class="panel-head">
+      <span>Equipment</span>
+      <span class="badge" id="asset-count">0</span>
+    </div>
+    <div class="panel-body">
+      <div class="asset-list" id="asset-list"></div>
+      <div class="palette-empty" id="palette-empty">
+        No equipment loaded.<br>
+        <button id="btn-load-2">Load scada_mixers.html</button>
+      </div>
+    </div>
+    <div class="panel-foot">
+      <kbd>Click</kbd> place · <kbd>Shift+Click</kbd> add<br>
+      <kbd>Drag</kbd> marquee · <kbd>Alt+Drag</kbd> pan<br>
+      <kbd>⌘+Scroll</kbd> zoom · <kbd>⌘Z</kbd> undo<br>
+      <kbd>⌘D</kbd> dup · <kbd>⌘A</kbd> all · <kbd>Del</kbd> remove
+    </div>
+  </aside>
+
+  <section class="workspace">
+    <div class="toolbar">
+      <button class="tool-btn" id="tgl-grid" aria-pressed="true">
+        <svg><use href="#i-grid"/></svg>Grid
+      </button>
+      <button class="tool-btn" id="tgl-snap" aria-pressed="true">
+        <svg><use href="#i-magnet"/></svg>Snap
+      </button>
+      <button class="tool-btn" id="tgl-tags" aria-pressed="true">
+        <svg><use href="#i-tag"/></svg>Tags
+      </button>
+      <label class="color-pick">BG <input type="color" id="bg-color" value="#ffffff"></label>
+      <div class="spacer"></div>
+      <span style="font-size:11px;color:var(--txt-3)" id="item-count">0 items</span>
+    </div>
+
+    <div class="scroller" id="scroller">
+      <div class="canvas-frame" id="canvas-frame">
+        <svg id="canvas" xmlns="http://www.w3.org/2000/svg"
+             viewBox="-240 -240 2400 1560" width="2400" height="1560"
+             preserveAspectRatio="xMidYMid meet">
+          <defs id="editor-defs">
+            <pattern id="grid-pat" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M20 0H0V20" fill="none" stroke="#1e88e5" stroke-opacity=".16" stroke-width="1"/>
+            </pattern>
+            <pattern id="grid-pat-lg" width="100" height="100" patternUnits="userSpaceOnUse">
+              <rect width="100" height="100" fill="url(#grid-pat)"/>
+              <path d="M100 0H0V100" fill="none" stroke="#1e88e5" stroke-opacity=".28" stroke-width="1"/>
+            </pattern>
+            <clipPath id="canvas-clip">
+              <rect x="0" y="0" width="1920" height="1080"/>
+            </clipPath>
+          </defs>
+          <defs id="shared-definitions"></defs>
+          <rect id="bgrect" x="0" y="0" width="1920" height="1080" fill="#ffffff"/>
+          <rect id="gridrect" x="0" y="0" width="1920" height="1080" fill="url(#grid-pat-lg)" clip-path="url(#canvas-clip)" pointer-events="none"/>
+          <g id="scene"></g>
+          <g id="labels-layer"></g>
+          <path id="outside-dim" pointer-events="none" fill="#04070a" fill-opacity="0.62" fill-rule="evenodd"
+                d="M-240 -240 H2160 V1320 H-240 Z M0 0 H1920 V1080 H0 Z"/>
+          <rect id="canvas-outline" x="0" y="0" width="1920" height="1080" fill="none" stroke="#10b981" stroke-width="2" pointer-events="none"/>
+          <g id="marquee-layer" pointer-events="none"></g>
+          <g id="overlay" pointer-events="none"></g>
+        </svg>
+      </div>
+
+      <div class="canvas-hint" id="empty-hint">
+        <div>
+          <span class="big">⬚</span>
+          <div id="hint-line1">Load <b>scada_mixers.html</b> to import equipment</div>
+          <div id="hint-line2" style="font-size:11px;margin-top:2px">Then click items in the left panel to place them here</div>
+          <button id="btn-load-3">Load scada_mixers.html</button>
+        </div>
+      </div>
+
+      <div class="zoom-dock">
+        <button id="btn-zoom-out" title="Zoom out">−</button>
+        <button id="btn-fit" title="Fit">Fit</button>
+        <span class="zoom-val" id="zoom-val">100%</span>
+        <button id="btn-zoom-in" title="Zoom in">+</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel panel-right">
+    <div class="sec">
+      <div class="panel-head">
+        <span>Selection</span>
+        <span class="badge hidden" id="sel-count-badge">0</span>
+      </div>
+
+      <div id="sel-empty" class="empty-insp">
+        <span class="icon">◇</span>
+        No item selected<br>
+        <span style="font-size:10.5px">Click, or drag a marquee</span>
+      </div>
+
+      <!-- SINGLE -->
+      <div id="sel-ui" class="insp-body hidden">
+        <div class="sel-head">
+          <div class="sel-thumb"><img id="sel-thumb" alt=""></div>
+          <div>
+            <div class="sel-tag" id="sel-tag">—</div>
+            <div class="sel-name" id="sel-name">—</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Scale <b id="scale-out">100%</b></div>
+          <input type="range" id="in-scale" min="5" max="400" step="1" value="100">
+          <div class="field-hint" id="size-out">—</div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><div class="field-label">X</div><input type="number" id="in-x" step="1"></div>
+          <div class="field"><div class="field-label">Y</div><input type="number" id="in-y" step="1"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><div class="field-label">Rotation °</div><input type="number" id="in-r" step="1"></div>
+          <div class="field"><div class="field-label">&nbsp;</div><button id="btn-reset-scale" class="tool-btn" style="justify-content:center;width:100%">Reset 100%</button></div>
+        </div>
+        <div class="btn-row">
+          <button id="btn-flip-h">Flip H</button>
+          <button id="btn-flip-v">Flip V</button>
+        </div>
+        <div class="btn-row">
+          <button id="btn-dup">Duplicate</button>
+          <button id="btn-del" class="danger">Delete</button>
+        </div>
+
+        <div class="label-panel">
+          <div class="head">
+            <span>Name Tag</span>
+            <span class="pill" id="label-preview-pill">PE-PS-888</span>
+          </div>
+          <div class="field">
+            <div class="field-label">Tag text</div>
+            <input type="text" id="in-label-text" maxlength="24" spellcheck="false" placeholder="PE-PS-888">
+          </div>
+          <div class="field">
+            <div class="field-label">Tag size <b id="label-size-out">14</b></div>
+            <input type="range" id="in-label-size" min="6" max="72" step="1" value="14">
+          </div>
+          <div class="btn-row">
+            <button id="btn-label-center">Center above</button>
+            <button id="btn-label-hide">Hide</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MULTI -->
+      <div id="sel-multi" class="insp-body hidden">
+        <div class="sel-head">
+          <div class="sel-thumb multi" id="sel-multi-count">0</div>
+          <div>
+            <div class="sel-tag">MULTI-SELECT</div>
+            <div class="sel-name" id="sel-multi-names">—</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button id="btn-multi-dup">Duplicate all</button>
+          <button id="btn-multi-del" class="danger">Delete all</button>
+        </div>
+        <div class="btn-row">
+          <button id="btn-multi-flip-h">Flip H all</button>
+          <button id="btn-multi-flip-v">Flip V all</button>
+        </div>
+        <div class="field-hint" style="line-height:1.7;padding-top:4px;border-top:1px solid var(--border)">
+          Drag any selected item to move the group.<br>
+          Corner handles resize proportionally.<br>
+          Rotation handle spins around group centre.<br>
+          <kbd>Shift+Click</kbd> toggles · <kbd>Esc</kbd> clears
+        </div>
+      </div>
+    </div>
+
+    <div class="sec" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="panel-head"><span>Layers</span><span class="badge" id="layer-count">0</span></div>
+      <div class="panel-body" style="padding:0"><div class="layers" id="layers"></div></div>
+      <div class="panel-foot" style="padding:8px">
+        <div class="btn-row">
+          <button id="btn-front">Bring front</button>
+          <button id="btn-back">Send back</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div class="status">
+  <div class="item"><span class="dot"></span><span id="status-state">Ready</span></div>
+  <div class="spacer" style="flex:1"></div>
+  <div class="item" id="status-sel"></div>
+  <div class="item">1920 × 1080 · Landscape</div>
+  <div class="item credit">
+    <span>Created with</span><span class="heart">♥</span><span>by</span><b>Jairo Ponce</b>
+  </div>
+</div>
+
+<div class="modal hidden" id="loader">
+  <div class="modal-card">
+    <div class="modal-icon"><svg><use href="#i-upload"/></svg></div>
+    <h2>Load equipment library</h2>
+    <p>
+      Select <code>scada_mixers.html</code> to import its eight equipment assets.
+      Nothing is uploaded — the file is parsed locally in your browser.
+    </p>
+    <div class="drop-zone" id="drop-zone">
+      <span class="dz-icon">⬆</span>
+      <span class="dz-tag">Drag &amp; drop scada_mixers.html here</span>
+      <p>or click to browse</p>
+    </div>
+    <input type="file" id="file-input" accept=".html,.htm,.svg,text/html,image/svg+xml" style="display:none">
+    <div class="modal-actions">
+      <button id="btn-browse" class="primary">Choose File</button>
+      <button id="btn-cancel-load">Cancel</button>
+    </div>
+    <div class="modal-err" id="load-err"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+(() => {
+/* ═══════════ CONSTANTS ═══════════ */
+const NS = 'http://www.w3.org/2000/svg';
+const CW = 1920, CH = 1080;
+const MARGIN = 240;
+const VBW = CW + MARGIN * 2, VBH = CH + MARGIN * 2;
+const SNAP = 5;
+const MIN_W = 20;
+const MIN_GROUP_SCALE = 0.1;
+const DEFAULT_TAG = 'PE-PS-888';
+const HISTORY_LIMIT = 120;
+
+/* ═══════════ HELPERS ═══════════ */
+const $ = s => document.querySelector(s);
+const el = (tag, attrs) => {
+  const n = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+};
+const clear = n => { while (n.firstChild) n.removeChild(n.firstChild); };
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const rotPt = (p, a) => {
+  const c = Math.cos(a), s = Math.sin(a);
+  return { x: p.x * c - p.y * s, y: p.x * s + p.y * c };
+};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ═══════════ DOM ═══════════ */
+const canvas = $('#canvas');
+const scene = $('#scene');
+const labelsLayer = $('#labels-layer');
+const marqueeLayer = $('#marquee-layer');
+const overlay = $('#overlay');
+const outline = $('#canvas-outline');
+const defsHost = $('#shared-definitions');
+const gridrect = $('#gridrect');
+const bgrect = $('#bgrect');
+const scroller = $('#scroller');
+const layersEl = $('#layers');
+const assetList = $('#asset-list');
+const warnChip = $('#warn-chip');
+const warnText = $('#warn-text');
+
+/* ═══════════ STATE ═══════════ */
+let assets = [];
+let items = [];
+let nodeById = new Map();
+let labelNodes = new Map();
+let selectedIds = new Set();
+let act = null;
+let nextId = 1;
+let zoom = 0.35;
+let zoomMode = 'fit';
+let snapOn = true;
+let showTags = true;
+let bgColor = '#ffffff';
+let defsString = '';
+let thumbUrls = [];
+let altHeld = false;
+
+const getAsset = id => assets.find(a => a.id === id);
+const selectedItems = () => items.filter(i => selectedIds.has(i.id));
+const firstSelected = () => selectedItems()[0] || null;
+
+/* ═══════════ HISTORY ═══════════ */
+let history = [];
+let historyIndex = -1;
+let historyTimer = null;
+let suppressHistory = false;
+
+function serializeState(){
+  return JSON.stringify({
+    bg: bgColor,
+    items: items.map(i => ({
+      id: i.id, assetId: i.assetId,
+      x: +i.x.toFixed(2), y: +i.y.toFixed(2),
+      w: +i.w.toFixed(2), rot: +i.rot.toFixed(2),
+      flipH: !!i.flipH, flipV: !!i.flipV,
+      label: {
+        text: i.label.text || DEFAULT_TAG,
+        dx: +(i.label.dx || 0).toFixed(2),
+        dy: +(i.label.dy || 0).toFixed(2),
+        size: i.label.size || 14,
+        visible: i.label.visible !== false
+      }
+    }))
+  });
+}
+function pushHistory(){
+  if (suppressHistory) return;
+  const snap = serializeState();
+  if (historyIndex >= 0 && history[historyIndex] === snap) return;
+  history = history.slice(0, historyIndex + 1);
+  history.push(snap);
+  if (history.length > HISTORY_LIMIT) history.shift();
+  historyIndex = history.length - 1;
+  updateHistoryUI();
+}
+function scheduleHistory(){
+  if (suppressHistory) return;
+  clearTimeout(historyTimer);
+  historyTimer = setTimeout(pushHistory, 200);
+}
+function updateHistoryUI(){
+  const u = $('#btn-undo'), r = $('#btn-redo');
+  if (u) u.disabled = historyIndex <= 0;
+  if (r) r.disabled = historyIndex >= history.length - 1;
+}
+function resetHistory(){
+  clearTimeout(historyTimer);
+  history = []; historyIndex = -1;
+  pushHistory();
+}
+function applySnapshot(snap){
+  suppressHistory = true;
+  clearTimeout(historyTimer);
+  const data = JSON.parse(snap);
+  bgColor = data.bg || '#ffffff';
+  bgrect.setAttribute('fill', bgColor);
+  $('#bg-color').value = bgColor;
+
+  items.forEach(it => { const n = nodeById.get(it.id); if (n) n.remove(); });
+  labelNodes.forEach(n => n.remove());
+  nodeById.clear(); labelNodes.clear();
+  items = []; selectedIds = new Set();
+
+  data.items.forEach(src => {
+    const a = getAsset(src.assetId); if (!a) return;
+    const it = {
+      id: src.id, assetId: src.assetId,
+      x: +src.x, y: +src.y, w: +src.w, rot: +src.rot,
+      flipH: !!src.flipH, flipV: !!src.flipV,
+      label: { ...src.label }
+    };
+    if (it.id >= nextId) nextId = it.id + 1;
+    items.push(it);
+    const node = buildItem(it, false);
+    scene.appendChild(node);
+    nodeById.set(it.id, node);
+    renderLabel(it);
+  });
+
+  drawOverlay(); refreshLayers(); syncInspector();
+  updateEmptyHint(); updateWarn(); updateCounts();
+  suppressHistory = false;
+}
+function undo(){
+  clearTimeout(historyTimer);
+  if (historyIndex <= 0) return;
+  historyIndex--;
+  applySnapshot(history[historyIndex]);
+  updateHistoryUI();
+  setStatus('Undo');
+}
+function redo(){
+  clearTimeout(historyTimer);
+  if (historyIndex >= history.length - 1) return;
+  historyIndex++;
+  applySnapshot(history[historyIndex]);
+  updateHistoryUI();
+  setStatus('Redo');
+}
+
+/* ═══════════ GEOMETRY ═══════════ */
+function defaultWidth(a){
+  const [,,vw, vh] = a.viewBox;
+  const byW = (CW * 0.55) / vw;
+  const byH = (CH * 0.65) / vh;
+  return vw * Math.min(byW, byH);
+}
+function itemSize(it){
+  const a = getAsset(it.assetId);
+  if (!a) return { w: it.w, h: it.w, s: 1 };
+  const s = it.w / a.viewBox[2];
+  return { w: it.w, h: a.viewBox[3] * s, s };
+}
+function itemTransform(it){
+  const { h } = itemSize(it);
+  let t = `translate(${it.x} ${it.y})`;
+  if (it.rot) t += ` rotate(${it.rot} ${it.w / 2} ${h / 2})`;
+  return t;
+}
+function innerTransform(it){
+  const a = getAsset(it.assetId);
+  if (!a) return '';
+  const [vx, vy, vw, vh] = a.viewBox;
+  const s = it.w / vw;
+  let t = '';
+  if (it.flipH) t += `translate(${it.w} 0) scale(-1 1) `;
+  if (it.flipV) t += `translate(0 ${vh * s}) scale(1 -1) `;
+  t += `scale(${s}) translate(${-vx} ${-vy})`;
+  return t.trim();
+}
+function scalePercent(it){
+  const a = getAsset(it.assetId);
+  if (!a) return 100;
+  return (it.w / defaultWidth(a)) * 100;
+}
+function itemCorners(it){
+  const { w, h } = itemSize(it);
+  const cx = it.x + w / 2, cy = it.y + h / 2;
+  const rad = it.rot * Math.PI / 180;
+  return [[0,0],[w,0],[w,h],[0,h]].map(([px, py]) => {
+    const r = rotPt({ x: px - w/2, y: py - h/2 }, rad);
+    return { x: cx + r.x, y: cy + r.y };
+  });
+}
+function itemBBox(it){
+  const cs = itemCorners(it);
+  return {
+    x0: Math.min(...cs.map(p => p.x)), y0: Math.min(...cs.map(p => p.y)),
+    x1: Math.max(...cs.map(p => p.x)), y1: Math.max(...cs.map(p => p.y))
+  };
+}
+function selectionBBox(){
+  const sel = selectedItems();
+  if (!sel.length) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  sel.forEach(it => {
+    const b = itemBBox(it);
+    if (b.x0 < x0) x0 = b.x0;
+    if (b.y0 < y0) y0 = b.y0;
+    if (b.x1 > x1) x1 = b.x1;
+    if (b.y1 > y1) y1 = b.y1;
+  });
+  return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
+function isOutside(it){
+  const b = itemBBox(it);
+  return b.x0 < -0.5 || b.y0 < -0.5 || b.x1 > CW + 0.5 || b.y1 > CH + 0.5;
+}
+function bboxIntersects(a, b){
+  return !(a.x1 < b.x0 || a.x0 > b.x1 || a.y1 < b.y0 || a.y0 > b.y1);
+}
+
+/* ═══════════ SOURCE PARSING ═══════════ */
+function loadSource(text){
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  let srcSvg = doc.getElementById('scada-mixers');
+  if (!srcSvg) srcSvg = [...doc.querySelectorAll('svg')].find(s => s.querySelector('.equipment-concept'));
+  if (!srcSvg) throw new Error('No equipment library found in that file.');
+
+  const defs = srcSvg.querySelector('#shared-definitions') || srcSvg.querySelector('defs');
+  if (!defs) throw new Error('No shared <defs> found in that file.');
+
+  const names = {};
+  doc.querySelectorAll('.machine-card[data-equipment]').forEach(card => {
+    const h = card.querySelector('h2');
+    if (h) names[card.dataset.equipment] = h.textContent.trim();
+  });
+
+  clear(defsHost);
+  const defsClone = doc.importNode(defs, true);
+  defsClone.removeAttribute('id');
+  defsHost.appendChild(defsClone);
+  defsString = new XMLSerializer().serializeToString(defsHost);
+
+  thumbUrls.forEach(u => URL.revokeObjectURL(u));
+  thumbUrls = [];
+  assets = [];
+
+  [...srcSvg.querySelectorAll('.equipment-concept')].forEach(node => {
+    const art = doc.importNode(node, true);
+    ['transform','style','data-state','role','aria-labelledby'].forEach(a => art.removeAttribute(a));
+    const vb = (node.getAttribute('data-view-box') || '0 0 100 100').trim().split(/\s+/).map(Number);
+    const id = node.id || ('asset-' + assets.length);
+    const title = node.querySelector('title');
+    const name = names[id] || (title ? title.textContent.split(':')[0] : id);
+    assets.push({
+      id, name,
+      tag: 'TYPE ' + String(assets.length + 1).padStart(2, '0'),
+      viewBox: vb, art,
+      thumb: makeThumb(vb, art)
+    });
+  });
+
+  if (!assets.length) throw new Error('The file contained no equipment concepts.');
+
+  try { localStorage.setItem('scadaEditor.source', text); } catch (e) {}
+
+  buildPalette();
+  restoreProject();
+  refreshLayers();
+  syncInspector();
+  updateEmptyHint();
+  updateWarn();
+  updateCounts();
+  $('#asset-count').textContent = assets.length;
+  $('#palette-empty').classList.add('hidden');
+  requestAnimationFrame(() => { if (zoomMode === 'fit') zoomFit(); });
+  resetHistory();
+  setStatus('Loaded ' + assets.length + ' equipment types');
+}
+
+function makeThumb(vb, art){
+  const s = `<svg xmlns="${NS}" viewBox="${vb.join(' ')}">${defsString}${
+    new XMLSerializer().serializeToString(art)}</svg>`;
+  const url = URL.createObjectURL(new Blob([s], { type: 'image/svg+xml;charset=utf-8' }));
+  thumbUrls.push(url);
+  return url;
+}
+
+/* ═══════════ PALETTE ═══════════ */
+function buildPalette(){
+  clear(assetList);
+  assets.forEach(a => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'asset';
+    b.innerHTML =
+      `<span class="asset-thumb"><img alt="" src="${a.thumb}"></span>
+       <span class="asset-info">
+         <span class="asset-tag">${a.tag}</span>
+         <span class="asset-name">${esc(a.name)}</span>
+       </span>`;
+    b.addEventListener('click', () => addAsset(a.id));
+    assetList.appendChild(b);
+  });
+}
+
+/* ═══════════ ITEM BUILD ═══════════ */
+function buildItem(it, forExport){
+  const a = getAsset(it.assetId);
+  if (!a) return el('g');
+  const g = el('g', forExport ? null : { class: 'item', 'data-id': String(it.id) });
+  g.setAttribute('transform', itemTransform(it));
+  const inner = el('g', { transform: innerTransform(it) });
+  if (!forExport){
+    inner.appendChild(el('rect', {
+      x: a.viewBox[0], y: a.viewBox[1],
+      width: a.viewBox[2], height: a.viewBox[3],
+      fill: 'transparent', 'pointer-events': 'all'
+    }));
+  }
+  inner.appendChild(a.art.cloneNode(true));
+  g.appendChild(inner);
+  return g;
+}
+
+/* ═══════════ COMPACT NAME TAG ═══════════ */
+const TAG_FONT_STACK = 'ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace';
+
+function labelDimensions(it){
+  const fs = Math.max(6, it.label.size || 14);
+  const text = it.label.text || ' ';
+  const charW = fs * 0.605;
+  const textW = Math.max(text.length * charW, fs * 0.7);
+  const textH = fs * 1.08;
+  return { w: textW, h: textH, fs };
+}
+
+function renderLabel(it){
+  let node = labelNodes.get(it.id);
+  if (!node){
+    node = el('g', { class: 'item-label', 'data-for': String(it.id) });
+    node.appendChild(el('rect', { class: 'lbl-bg', rx: '2.5' }));
+    node.appendChild(el('text', { class: 'lbl-txt' }));
+    labelsLayer.appendChild(node);
+    labelNodes.set(it.id, node);
+  }
+  const bg = node.querySelector('.lbl-bg');
+  const txt = node.querySelector('.lbl-txt');
+  const { w, h, fs } = labelDimensions(it);
+
+  txt.textContent = it.label.text || ' ';
+  txt.setAttribute('font-size', String(fs));
+  txt.setAttribute('text-anchor', 'middle');
+  txt.setAttribute('dominant-baseline', 'middle');
+  txt.setAttribute('x', String(w / 2));
+  txt.setAttribute('y', String(h / 2));
+
+  bg.setAttribute('width', String(w));
+  bg.setAttribute('height', String(h));
+  bg.setAttribute('rx', String(Math.min(2.5, fs * 0.2)));
+
+  const visible = (it.label.visible !== false) && showTags;
+  node.style.display = visible ? '' : 'none';
+  node.classList.toggle('sel', selectedIds.has(it.id));
+
+  updateLabelPosition(it);
+}
+
+function updateLabelPosition(it){
+  const node = labelNodes.get(it.id);
+  if (!node) return;
+  const x = it.x + (it.label.dx || 0);
+  const y = it.y + (it.label.dy || 0);
+  node.setAttribute('transform', `translate(${x} ${y})`);
+}
+
+function removeLabel(id){
+  const n = labelNodes.get(id);
+  if (n) n.remove();
+  labelNodes.delete(id);
+}
+
+function buildLabelExport(it){
+  if (it.label.visible === false) return null;
+  const { w, h, fs } = labelDimensions(it);
+  const x = it.x + (it.label.dx || 0);
+  const y = it.y + (it.label.dy || 0);
+  const g = el('g', { transform: `translate(${x} ${y})` });
+  g.appendChild(el('rect', {
+    x: 0, y: 0, width: w, height: h, rx: Math.min(2.5, fs * 0.2),
+    fill: '#ffffff', stroke: '#0d3b24', 'stroke-width': 1.5
+  }));
+  const txt = el('text', {
+    x: w / 2, y: h / 2,
+    'font-size': fs,
+    'font-family': TAG_FONT_STACK,
+    'font-weight': 800,
+    'letter-spacing': 0,
+    fill: '#0d3b24',
+    'text-anchor': 'middle',
+    'dominant-baseline': 'middle'
+  });
+  txt.textContent = it.label.text || ' ';
+  g.appendChild(txt);
+  return g;
+}
+
+function updateItemNode(it){
+  const node = nodeById.get(it.id);
+  if (!node) return;
+  node.setAttribute('transform', itemTransform(it));
+  const inner = node.firstElementChild;
+  if (inner) inner.setAttribute('transform', innerTransform(it));
+  updateLabelPosition(it);
+  if (selectedIds.has(it.id)) drawOverlay();
+  updateWarn();
+}
+
+/* ═══════════ ITEM CRUD ═══════════ */
+function addAsset(assetId){
+  const a = getAsset(assetId);
+  if (!a) return;
+  const w = defaultWidth(a);
+  const h = a.viewBox[3] * (w / a.viewBox[2]);
+  const cascade = (items.length % 6) * 26;
+  const x = Math.round((CW - w) / 2 + cascade - 65);
+  const y = Math.round((CH - h) / 2 + cascade - 65);
+
+  const it = {
+    id: nextId++, assetId,
+    x, y, w, rot: 0, flipH: false, flipV: false,
+    label: { text: DEFAULT_TAG, dx: 8, dy: -34, size: 14, visible: true }
+  };
+  items.push(it);
+  const node = buildItem(it, false);
+  scene.appendChild(node);
+  nodeById.set(it.id, node);
+  renderLabel(it);
+  setSelection([it.id]);
+  refreshLayers(); updateEmptyHint(); updateWarn(); updateCounts();
+  pushHistory();
+}
+
+function removeItem(id){
+  const i = items.findIndex(x => x.id === id);
+  if (i < 0) return;
+  items.splice(i, 1);
+  const node = nodeById.get(id);
+  if (node) node.remove();
+  nodeById.delete(id);
+  removeLabel(id);
+  selectedIds.delete(id);
+  drawOverlay(); refreshLayers(); syncInspector();
+  updateEmptyHint(); updateWarn(); updateCounts();
+  pushHistory();
+}
+
+function removeSelected(){
+  const ids = [...selectedIds];
+  if (!ids.length) return;
+  ids.forEach(id => removeItem(id));
+  pushHistory();
+}
+
+function duplicateSelected(){
+  const sel = selectedItems();
+  if (!sel.length) return;
+  const created = [];
+  sel.forEach(src => {
+    const copy = {
+      ...src, id: nextId++,
+      x: src.x + 30, y: src.y + 30,
+      label: { ...src.label }
+    };
+    items.push(copy);
+    const node = buildItem(copy, false);
+    scene.appendChild(node);
+    nodeById.set(copy.id, node);
+    renderLabel(copy);
+    created.push(copy.id);
+  });
+  setSelection(created);
+  refreshLayers(); updateWarn(); updateCounts();
+  pushHistory();
+}
+
+function reorder(id, dir){
+  const i = items.findIndex(x => x.id === id);
+  if (i < 0) return;
+  const [it] = items.splice(i, 1);
+  items.splice(dir === 'front' ? items.length : 0, 0, it);
+  items.forEach(x => {
+    const n = nodeById.get(x.id);
+    if (n) scene.appendChild(n);
+  });
+  refreshLayers();
+  pushHistory();
+}
+
+function setScale(it, pct){
+  const a = getAsset(it.assetId);
+  if (!a) return;
+  const ratio = a.viewBox[3] / a.viewBox[2];
+  const nw = Math.max(MIN_W, defaultWidth(a) * pct / 100);
+  const nh = nw * ratio;
+  const old = itemSize(it);
+  const cx = it.x + old.w / 2, cy = it.y + old.h / 2;
+  it.w = nw;
+  it.x = cx - nw / 2;
+  it.y = cy - nh / 2;
+  updateItemNode(it);
+}
+
+/* ═══════════ SELECTION ═══════════ */
+function setSelection(ids){
+  selectedIds = new Set(ids.filter(id => items.some(i => i.id === id)));
+  afterSelectionChange();
+}
+function toggleSelection(id){
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  afterSelectionChange();
+}
+function clearSelection(){
+  if (selectedIds.size === 0) return;
+  selectedIds.clear();
+  afterSelectionChange();
+}
+function isSelected(id){ return selectedIds.has(id); }
+
+function afterSelectionChange(){
+  labelNodes.forEach((n, key) => n.classList.toggle('sel', selectedIds.has(key)));
+  drawOverlay();
+  refreshLayers();
+  syncInspector();
+  updateCounts();
+}
+
+function updateEmptyHint(){ $('#empty-hint').classList.toggle('hidden', items.length > 0); }
+function updateCounts(){
+  $('#item-count').textContent = items.length + (items.length === 1 ? ' item' : ' items');
+  $('#layer-count').textContent = items.length;
+  const n = selectedIds.size;
+  const badge = $('#sel-count-badge');
+  if (badge){
+    badge.classList.toggle('hidden', n === 0);
+    badge.textContent = n + ' selected';
+  }
+  $('#status-sel').innerHTML = n ? `<span class="sel-count">${n}</span> selected` : '';
+}
+function updateWarn(){
+  const n = items.filter(isOutside).length;
+  warnChip.classList.toggle('hidden', n === 0);
+  if (n) warnText.textContent = n === 1 ? '1 item outside artboard' : n + ' items outside artboard';
+}
+function setStatus(s){ $('#status-state').textContent = s; }
+
+/* ═══════════ OVERLAY ═══════════ */
+function drawOverlay(){
+  clear(overlay);
+  const sel = selectedItems();
+  if (!sel.length) return;
+
+  if (sel.length === 1) drawSingleOverlay(sel[0]);
+  else drawGroupOverlay();
+}
+
+function drawSingleOverlay(it){
+  const { w, h } = itemSize(it);
+  overlay.setAttribute('transform', itemTransform(it));
+  const k = 1 / zoom, sw = 1.6 * k;
+
+  overlay.appendChild(el('rect', { x: 0, y: 0, width: w, height: h, fill: 'none', stroke: '#10b981', 'stroke-width': sw }));
+
+  const ry = -32 * k, rr = 9 * k;
+  overlay.appendChild(el('line', { x1: w/2, y1: 0, x2: w/2, y2: ry, stroke: '#10b981', 'stroke-width': sw }));
+  const rot = el('circle', {
+    cx: w/2, cy: ry, r: rr, fill: '#10b981', stroke: '#07130c', 'stroke-width': sw,
+    'data-handle': 'rot', 'pointer-events': 'all'
+  });
+  rot.style.cursor = 'grab';
+  overlay.appendChild(rot);
+
+  const hs = 11 * k;
+  [['nw',0,0],['ne',w,0],['se',w,h],['sw',0,h]].forEach(([name,cx,cy]) => {
+    const r = el('rect', {
+      x: cx - hs/2, y: cy - hs/2, width: hs, height: hs,
+      fill: '#fff', stroke: '#10b981', 'stroke-width': sw,
+      'data-handle': name, 'pointer-events': 'all'
+    });
+    r.style.cursor = (name === 'nw' || name === 'se') ? 'nwse-resize' : 'nesw-resize';
+    overlay.appendChild(r);
+  });
+}
+
+function drawGroupOverlay(){
+  const b = selectionBBox();
+  if (!b) return;
+  overlay.removeAttribute('transform');
+  const k = 1 / zoom, sw = 1.6 * k;
+
+  // Group bounding box
+  overlay.appendChild(el('rect', {
+    x: b.x0, y: b.y0, width: b.w, height: b.h,
+    fill: 'rgba(16,185,129,.06)', stroke: '#10b981',
+    'stroke-width': sw, 'stroke-dasharray': `${6 * k} ${4 * k}`
+  }));
+
+  // Per-item outline
+  selectedItems().forEach(it => {
+    const cs = itemCorners(it);
+    const poly = el('polygon', {
+      points: cs.map(p => `${p.x},${p.y}`).join(' '),
+      fill: 'none', stroke: 'rgba(16,185,129,.55)', 'stroke-width': sw * 0.7
+    });
+    overlay.appendChild(poly);
+  });
+
+  // Rotation handle above the group bbox
+  const ry = b.y0 - 32 * k, rr = 9 * k;
+  overlay.appendChild(el('line', {
+    x1: b.cx, y1: b.y0, x2: b.cx, y2: ry,
+    stroke: '#10b981', 'stroke-width': sw
+  }));
+  const rot = el('circle', {
+    cx: b.cx, cy: ry, r: rr, fill: '#10b981', stroke: '#07130c', 'stroke-width': sw,
+    'data-handle': 'rot', 'pointer-events': 'all'
+  });
+  rot.style.cursor = 'grab';
+  overlay.appendChild(rot);
+
+  // Corner handles
+  const hs = 11 * k;
+  [
+    ['nw', b.x0, b.y0],
+    ['ne', b.x1, b.y0],
+    ['se', b.x1, b.y1],
+    ['sw', b.x0, b.y1]
+  ].forEach(([name, cx, cy]) => {
+    const r = el('rect', {
+      x: cx - hs/2, y: cy - hs/2, width: hs, height: hs,
+      fill: '#fff', stroke: '#10b981', 'stroke-width': sw,
+      'data-handle': name, 'pointer-events': 'all'
+    });
+    r.style.cursor = (name === 'nw' || name === 'se') ? 'nwse-resize' : 'nesw-resize';
+    overlay.appendChild(r);
+  });
+}
+
+/* ═══════════ POINTER ═══════════ */
+function svgPoint(cx, cy){
+  const p = canvas.createSVGPoint();
+  p.x = cx; p.y = cy;
+  return p.matrixTransform(canvas.getScreenCTM().inverse());
+}
+function capturePointer(e){
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+}
+
+canvas.addEventListener('pointerdown', e => {
+  if (e.button !== 0 && e.button !== 1) return;
+
+  // Alt-pan or middle-click pan
+  if (e.altKey || e.button === 1) { startPan(e); return; }
+
+  const t = e.target;
+
+  // Label
+  const lblGroup = t.closest ? t.closest('.item-label') : null;
+  if (lblGroup){
+    const id = Number(lblGroup.getAttribute('data-for'));
+    const it = items.find(x => x.id === id);
+    if (!it) return;
+    if (e.shiftKey){ toggleSelection(id); return; }
+    if (!isSelected(id)) setSelection([id]);
+    startLabelMove(e, it);
+    return;
+  }
+
+  // Selection handle
+  const handle = t.closest ? t.closest('[data-handle]') : null;
+  if (handle && selectedIds.size){
+    startHandle(e, handle.getAttribute('data-handle'));
+    return;
+  }
+
+  // Item
+  const itemEl = t.closest ? t.closest('.item') : null;
+  if (itemEl){
+    const id = Number(itemEl.getAttribute('data-id'));
+    if (e.shiftKey){ toggleSelection(id); return; }
+    if (!isSelected(id)) setSelection([id]);
+    startMove(e, id);
+    return;
+  }
+
+  // Empty canvas
+  startMarquee(e);
+});
+
+canvas.addEventListener('dblclick', e => {
+  const t = e.target;
+  const lblGroup = t.closest ? t.closest('.item-label') : null;
+  if (lblGroup){
+    const id = Number(lblGroup.getAttribute('data-for'));
+    const it = items.find(x => x.id === id);
+    if (it) editLabel(it);
+  }
+});
+
+/* ── Pan ── */
+function startPan(e){
+  act = {
+    mode: 'pan',
+    startX: e.clientX, startY: e.clientY,
+    sl0: scroller.scrollLeft, st0: scroller.scrollTop
+  };
+  canvas.classList.add('panning-active');
+  capturePointer(e);
+  e.preventDefault();
+}
+
+/* ── Marquee ── */
+function startMarquee(e){
+  const start = svgPoint(e.clientX, e.clientY);
+  act = {
+    mode: 'marquee',
+    start, current: { ...start },
+    base: new Set(selectedIds),
+    shift: e.shiftKey,
+    moved: false
+  };
+  capturePointer(e);
+  e.preventDefault();
+}
+function drawMarquee(){
+  if (!act || act.mode !== 'marquee') return;
+  let rect = document.getElementById('marquee-rect');
+  if (!rect){
+    rect = el('rect', { id: 'marquee-rect' });
+    marqueeLayer.appendChild(rect);
+  }
+  const s = act.start, c = act.current;
+  const x = Math.min(s.x, c.x), y = Math.min(s.y, c.y);
+  const w = Math.abs(c.x - s.x), h = Math.abs(c.y - s.y);
+  rect.setAttribute('x', x);
+  rect.setAttribute('y', y);
+  rect.setAttribute('width', w);
+  rect.setAttribute('height', h);
+  rect.setAttribute('stroke-width', String(1.4 / zoom));
+}
+function clearMarquee(){
+  const r = document.getElementById('marquee-rect');
+  if (r) r.remove();
+}
+
+/* ── Move (single or group) ── */
+function startMove(e, clickedId){
+  const p = svgPoint(e.clientX, e.clientY);
+  const states = selectedItems().map(it => ({ id: it.id, x0: it.x, y0: it.y }));
+  act = {
+    mode: 'move',
+    startPt: p,
+    states,
+    clickedId,
+    wasMulti: selectedIds.size > 1,
+    moved: false
+  };
+  capturePointer(e);
+  e.preventDefault();
+}
+
+/* ── Label move ── */
+function startLabelMove(e, it){
+  const p = svgPoint(e.clientX, e.clientY);
+  act = {
+    mode: 'label-move',
+    id: it.id,
+    sx: p.x, sy: p.y,
+    dx0: it.label.dx, dy0: it.label.dy,
+    moved: false
+  };
+  capturePointer(e);
+  e.preventDefault();
+}
+
+/* ── Handle drag (single or group) ── */
+function startHandle(e, handle){
+  const sel = selectedItems();
+  if (!sel.length) return;
+
+  if (sel.length === 1){
+    startSingleHandle(e, sel[0], handle);
+    return;
+  }
+  startGroupHandle(e, handle, sel);
+}
+
+function startSingleHandle(e, it, handle){
+  const { w: w0, h: h0 } = itemSize(it);
+  const c = { x: w0 / 2, y: h0 / 2 };
+  const rad = it.rot * Math.PI / 180;
+  const p = svgPoint(e.clientX, e.clientY);
+
+  if (handle === 'rot'){
+    act = {
+      mode: 'rotate', id: it.id,
+      C: { x: it.x + c.x, y: it.y + c.y },
+      a0: Math.atan2(p.y - (it.y + c.y), p.x - (it.x + c.x)),
+      rot0: it.rot
+    };
+    capturePointer(e);
+    e.preventDefault();
+    return;
+  }
+
+  const cornerMap = { nw:[0,0], ne:[w0,0], se:[w0,h0], sw:[0,h0] };
+  const anchorMap = { nw:[w0,h0], ne:[0,h0], se:[0,0], sw:[w0,0] };
+  const cornerLocal = { x: cornerMap[handle][0], y: cornerMap[handle][1] };
+  const anchorLocal = { x: anchorMap[handle][0], y: anchorMap[handle][1] };
+  const d0 = { x: anchorLocal.x - c.x, y: anchorLocal.y - c.y };
+  const d0r = rotPt(d0, rad);
+  const A = { x: it.x + c.x + d0r.x, y: it.y + c.y + d0r.y };
+  const v0 = { x: cornerLocal.x - anchorLocal.x, y: cornerLocal.y - anchorLocal.y };
+
+  act = { mode: 'resize', id: it.id, w0, h0, c, rad, A, v0, anchorLocal };
+  capturePointer(e);
+  e.preventDefault();
+}
+
+function startGroupHandle(e, handle, sel){
+  const bbox = selectionBBox();
+  const p = svgPoint(e.clientX, e.clientY);
+
+  if (handle === 'rot'){
+    act = {
+      mode: 'group-rotate',
+      startPt: p,
+      center: { x: bbox.cx, y: bbox.cy },
+      a0: Math.atan2(p.y - bbox.cy, p.x - bbox.cx),
+      states: sel.map(it => {
+        const sz = itemSize(it);
+        const cx = it.x + sz.w / 2, cy = it.y + sz.h / 2;
+        return {
+          id: it.id,
+          rot0: it.rot,
+          dist: Math.hypot(cx - bbox.cx, cy - bbox.cy),
+          angle0: Math.atan2(cy - bbox.cy, cx - bbox.cx)
+        };
+      })
+    };
+    capturePointer(e);
+    e.preventDefault();
+    return;
+  }
+
+  const cornerMap = {
+    nw: { x: bbox.x0, y: bbox.y0 },
+    ne: { x: bbox.x1, y: bbox.y0 },
+    se: { x: bbox.x1, y: bbox.y1 },
+    sw: { x: bbox.x0, y: bbox.y1 }
+  };
+  const anchorMap = {
+    nw: { x: bbox.x1, y: bbox.y1 },
+    ne: { x: bbox.x0, y: bbox.y1 },
+    se: { x: bbox.x0, y: bbox.y0 },
+    sw: { x: bbox.x1, y: bbox.y0 }
+  };
+  const corner = cornerMap[handle];
+  const anchor = anchorMap[handle];
+  const v0 = { x: corner.x - anchor.x, y: corner.y - anchor.y };
+
+  act = {
+    mode: 'group-resize',
+    anchor, v0,
+    states: sel.map(it => ({ id: it.id, x0: it.x, y0: it.y, w0: it.w }))
+  };
+  capturePointer(e);
+  e.preventDefault();
+}
+
+/* ── Pointer move ── */
+window.addEventListener('pointermove', e => {
+  if (!act) return;
+
+  // ── Pan ──
+  if (act.mode === 'pan'){
+    scroller.scrollLeft = act.sl0 - (e.clientX - act.startX);
+    scroller.scrollTop  = act.st0 - (e.clientY - act.startY);
+    return;
+  }
+
+  // ── Marquee ──
+  if (act.mode === 'marquee'){
+    const p = svgPoint(e.clientX, e.clientY);
+    if (Math.hypot(p.x - act.start.x, p.y - act.start.y) > 3) act.moved = true;
+    act.current = p;
+    drawMarquee();
+    return;
+  }
+
+  const p = svgPoint(e.clientX, e.clientY);
+
+  // ── Group/single move ──
+  if (act.mode === 'move'){
+    const dx = p.x - act.startPt.x;
+    const dy = p.y - act.startPt.y;
+    if (Math.hypot(dx, dy) > 2) act.moved = true;
+    if (!act.moved) return;
+
+    let sdx = dx, sdy = dy;
+    if (snapOn){
+      // Snap using the first state as the anchor
+      const s0 = act.states[0];
+      const tx = Math.round((s0.x0 + dx) / SNAP) * SNAP;
+      const ty = Math.round((s0.y0 + dy) / SNAP) * SNAP;
+      sdx = tx - s0.x0;
+      sdy = ty - s0.y0;
+    }
+    act.states.forEach(s => {
+      const it = items.find(i => i.id === s.id);
+      if (!it) return;
+      it.x = s.x0 + sdx;
+      it.y = s.y0 + sdy;
+      updateItemNode(it);
+    });
+    return;
+  }
+
+  // ── Label move ──
+  if (act.mode === 'label-move'){
+    const it = items.find(i => i.id === act.id); if (!it) return;
+    let dx = act.dx0 + (p.x - act.sx);
+    let dy = act.dy0 + (p.y - act.sy);
+    if (Math.hypot(dx - act.dx0, dy - act.dy0) > 2) act.moved = true;
+    if (snapOn){
+      dx = Math.round(dx / SNAP) * SNAP;
+      dy = Math.round(dy / SNAP) * SNAP;
+    }
+    it.label.dx = dx;
+    it.label.dy = dy;
+    updateLabelPosition(it);
+    return;
+  }
+
+  // ── Single rotate ──
+  if (act.mode === 'rotate'){
+    const it = items.find(i => i.id === act.id); if (!it) return;
+    let ang = (Math.atan2(p.y - act.C.y, p.x - act.C.x) - act.a0) * 180 / Math.PI + act.rot0;
+    if (e.shiftKey) ang = Math.round(ang / 15) * 15;
+    it.rot = Math.round(ang * 10) / 10;
+    updateItemNode(it);
+    return;
+  }
+
+  // ── Single resize ──
+  if (act.mode === 'resize'){
+    const it = items.find(i => i.id === act.id); if (!it) return;
+    const { w0, h0, c, rad, A, v0, anchorLocal } = act;
+    const vW = { x: p.x - A.x, y: p.y - A.y };
+    const vL = rotPt(vW, -rad);
+    const denom = v0.x * v0.x + v0.y * v0.y || 1;
+    let k = (vL.x * v0.x + vL.y * v0.y) / denom;
+    k = Math.max(k, MIN_W / w0);
+
+    const w1 = w0 * k, h1 = h0 * k;
+    const dNew = { x: k * (anchorLocal.x - c.x), y: k * (anchorLocal.y - c.y) };
+    const dNewR = rotPt(dNew, rad);
+    const C1 = { x: A.x - dNewR.x, y: A.y - dNewR.y };
+    it.w = w1;
+    it.x = C1.x - w1 / 2;
+    it.y = C1.y - h1 / 2;
+    updateItemNode(it);
+    syncInspector();
+    return;
+  }
+
+  // ── Group resize ──
+  if (act.mode === 'group-resize'){
+    const { anchor, v0, states } = act;
+    const vW = { x: p.x - anchor.x, y: p.y - anchor.y };
+    const denom = v0.x * v0.x + v0.y * v0.y || 1;
+    let k = (vW.x * v0.x + vW.y * v0.y) / denom;
+    k = Math.max(k, MIN_GROUP_SCALE);
+
+    states.forEach(s => {
+      const it = items.find(i => i.id === s.id);
+      if (!it) return;
+      it.x = anchor.x + (s.x0 - anchor.x) * k;
+      it.y = anchor.y + (s.y0 - anchor.y) * k;
+      it.w = Math.max(MIN_W, s.w0 * k);
+      updateItemNode(it);
+    });
+    drawOverlay();
+    syncInspector();
+    return;
+  }
+
+  // ── Group rotate ──
+  if (act.mode === 'group-rotate'){
+    let dAng = Math.atan2(p.y - act.center.y, p.x - act.center.x) - act.a0;
+
+    if (e.shiftKey){
+      // Snap by total rotation of the first item
+      const s0 = act.states[0];
+      const total = s0.rot0 + dAng * 180 / Math.PI;
+      const snapped = Math.round(total / 15) * 15;
+      dAng = (snapped - s0.rot0) * Math.PI / 180;
+    }
+    act.states.forEach(s => {
+      const it = items.find(i => i.id === s.id);
+      if (!it) return;
+      const newAng = s.angle0 + dAng;
+      const sz = itemSize(it);
+      it.x = act.center.x + s.dist * Math.cos(newAng) - sz.w / 2;
+      it.y = act.center.y + s.dist * Math.sin(newAng) - sz.h / 2;
+      it.rot = s.rot0 + dAng * 180 / Math.PI;
+      updateItemNode(it);
+    });
+    drawOverlay();
+    syncInspector();
+    return;
+  }
+});
+
+/* ── Pointer up ── */
+window.addEventListener('pointerup', () => {
+  if (!act) return;
+
+  if (act.mode === 'pan'){
+    canvas.classList.remove('panning-active');
+  }
+
+  if (act.mode === 'marquee'){
+    clearMarquee();
+    if (act.moved){
+      const s = act.start, c = act.current;
+      const rect = {
+        x0: Math.min(s.x, c.x), y0: Math.min(s.y, c.y),
+        x1: Math.max(s.x, c.x), y1: Math.max(s.y, c.y)
+      };
+      const hits = items.filter(it => bboxIntersects(itemBBox(it), rect)).map(it => it.id);
+      if (act.shift){
+        const next = new Set(act.base);
+        hits.forEach(id => next.add(id));
+        setSelection([...next]);
+      } else {
+        setSelection(hits);
+      }
+    } else {
+      // Plain click on empty
+      if (!act.shift) setSelection([]);
+    }
+  }
+
+  if (act.mode === 'move' && !act.moved && act.wasMulti && act.clickedId){
+    // Click without drag on a selected item — reduce to just that item
+    setSelection([act.clickedId]);
+  }
+
+  const wasMove = act.mode === 'move' || act.mode === 'resize'
+                || act.mode === 'rotate' || act.mode === 'group-resize'
+                || act.mode === 'group-rotate' || act.mode === 'label-move';
+  const didMove = act.moved !== false;
+
+  act = null;
+  syncInspector();
+  refreshLayers();
+  updateWarn();
+
+  if (wasMove && didMove) pushHistory();
+});
+
+/* ═══════════ INLINE LABEL EDITOR ═══════════ */
+function editLabel(it){
+  const node = labelNodes.get(it.id);
+  if (!node) return;
+  const bg = node.querySelector('.lbl-bg');
+  const rect = bg.getBoundingClientRect();
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = it.label.text || '';
+  inp.maxLength = 24;
+  inp.spellcheck = false;
+  const fs = Math.max(10, rect.height * 0.85);
+  Object.assign(inp.style, {
+    position: 'fixed',
+    left: rect.left + 'px',
+    top: rect.top + 'px',
+    width: Math.max(rect.width, 90) + 'px',
+    height: rect.height + 'px',
+    padding: '0', margin: '0',
+    font: `800 ${fs}px ${TAG_FONT_STACK}`,
+    letterSpacing: '0', textAlign: 'center',
+    color: '#0d3b24', background: '#ffffff',
+    border: '2px solid #10b981',
+    borderRadius: Math.min(3, rect.height * 0.2) + 'px',
+    outline: 'none', boxSizing: 'border-box', zIndex: '9999',
+    boxShadow: '0 6px 20px rgba(0,0,0,.35)'
+  });
+  document.body.appendChild(inp);
+  inp.focus(); inp.select();
+
+  node.classList.add('editing');
+
+  const commit = () => {
+    const v = inp.value.trim();
+    it.label.text = v || DEFAULT_TAG;
+    inp.remove();
+    node.classList.remove('editing');
+    renderLabel(it);
+    syncInspector();
+    pushHistory();
+  };
+  const cancel = () => {
+    inp.remove();
+    node.classList.remove('editing');
+    renderLabel(it);
+  };
+
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); inp.blur(); }
+    if (e.key === 'Escape'){ e.preventDefault(); inp.removeEventListener('blur', commit); cancel(); }
+  });
+}
+
+/* ═══════════ KEYBOARD ═══════════ */
+window.addEventListener('keydown', e => {
+  // Alt tracking for pan cursor
+  if (e.key === 'Alt' && !altHeld){
+    altHeld = true;
+    canvas.classList.add('panning');
+    // prevent menu focus in Firefox
+    if (e.preventDefault) e.preventDefault();
+    return;
+  }
+
+  const mod = e.metaKey || e.ctrlKey;
+  const tag = (e.target.tagName || '').toLowerCase();
+  const inField = tag === 'input' || tag === 'select' || tag === 'textarea';
+
+  if (mod && e.key.toLowerCase() === 'z'){
+    if (!inField || e.shiftKey){
+      e.preventDefault();
+      if (e.shiftKey) redo(); else undo();
+      return;
+    }
+  }
+  if (mod && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); return; }
+
+  if (inField) return;
+
+  if (e.key === 'Escape'){ clearSelection(); return; }
+
+  if (mod && e.key.toLowerCase() === 'a'){
+    e.preventDefault();
+    setSelection(items.map(i => i.id));
+    return;
+  }
+
+  if (!selectedIds.size) return;
+
+  if (e.key === 'Delete' || e.key === 'Backspace'){
+    e.preventDefault();
+    removeSelected();
+    return;
+  }
+  if (mod && e.key.toLowerCase() === 'd'){
+    e.preventDefault();
+    duplicateSelected();
+    return;
+  }
+
+  const step = e.shiftKey ? 10 : 1;
+  let dx = 0, dy = 0;
+  if (e.key === 'ArrowLeft') dx = -step;
+  if (e.key === 'ArrowRight') dx = step;
+  if (e.key === 'ArrowUp') dy = -step;
+  if (e.key === 'ArrowDown') dy = step;
+  if (dx || dy){
+    selectedItems().forEach(it => {
+      it.x += dx; it.y += dy;
+      updateItemNode(it);
+    });
+    syncInspector();
+    scheduleHistory();
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('keyup', e => {
+  if (e.key === 'Alt'){
+    altHeld = false;
+    canvas.classList.remove('panning');
+  }
+});
+
+/* ═══════════ LAYERS ═══════════ */
+function refreshLayers(){
+  clear(layersEl);
+  [...items].reverse().forEach((it, i) => {
+    const a = getAsset(it.assetId);
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'layer' + (isSelected(it.id) ? ' sel' : '');
+    row.innerHTML = `<span class="layer-dot"></span><span class="layer-idx">${items.length - i}</span>
+                     <span class="layer-name">${esc(a ? a.name : it.assetId)}</span>`;
+    row.addEventListener('click', (ev) => {
+      if (ev.shiftKey) toggleSelection(it.id);
+      else setSelection([it.id]);
+    });
+    layersEl.appendChild(row);
+  });
+}
+
+/* ═══════════ INSPECTOR ═══════════ */
+const inX = $('#in-x'), inY = $('#in-y'), inR = $('#in-r'), inScale = $('#in-scale');
+const inLabelText = $('#in-label-text');
+const inLabelSize = $('#in-label-size');
+
+function paintSlider(slider){
+  if (!slider) return;
+  const min = +slider.min, max = +slider.max, v = +slider.value;
+  slider.style.setProperty('--p', (((v - min) / (max - min)) * 100) + '%');
+}
+
+function syncInspector(){
+  const n = selectedIds.size;
+  const badge = $('#sel-count-badge');
+  if (badge){
+    badge.classList.toggle('hidden', n === 0);
+    badge.textContent = n + ' selected';
+  }
+
+  $('#sel-empty').classList.toggle('hidden', n > 0);
+  $('#sel-ui').classList.toggle('hidden', n !== 1);
+  $('#sel-multi').classList.toggle('hidden', n < 2);
+
+  if (n === 0){ paintSlider(inScale); paintSlider(inLabelSize); return; }
+
+  if (n === 1){
+    const it = firstSelected();
+    const a = getAsset(it.assetId);
+    $('#sel-thumb').src = a ? a.thumb : '';
+    $('#sel-tag').textContent = a ? a.tag : '';
+    $('#sel-name').textContent = a ? a.name : '';
+
+    inX.value = Math.round(it.x);
+    inY.value = Math.round(it.y);
+    inR.value = Math.round(it.rot);
+
+    const pct = scalePercent(it);
+    inScale.value = Math.round(clamp(pct, +inScale.min, +inScale.max));
+    $('#scale-out').textContent = Math.round(pct) + '%';
+    paintSlider(inScale);
+
+    const s = itemSize(it);
+    $('#size-out').textContent = Math.round(s.w) + ' × ' + Math.round(s.h) + ' px';
+
+    inLabelText.value = it.label.text || '';
+    inLabelSize.value = it.label.size || 14;
+    $('#label-size-out').textContent = it.label.size || 14;
+    $('#label-preview-pill').textContent = it.label.text || DEFAULT_TAG;
+    paintSlider(inLabelSize);
+  } else {
+    // Multi
+    $('#sel-multi-count').textContent = n;
+    const names = selectedItems().map(it => {
+      const a = getAsset(it.assetId);
+      return a ? a.name : it.assetId;
+    });
+    const preview = names.slice(0, 2).join(', ');
+    $('#sel-multi-names').textContent = names.length > 2
+      ? preview + ' + ' + (names.length - 2) + ' more'
+      : preview;
+  }
+}
+
+inScale.addEventListener('input', () => {
+  const it = firstSelected(); if (!it || selectedIds.size !== 1) return;
+  setScale(it, +inScale.value);
+  $('#scale-out').textContent = Math.round(+inScale.value) + '%';
+  const s = itemSize(it);
+  $('#size-out').textContent = Math.round(s.w) + ' × ' + Math.round(s.h) + ' px';
+  paintSlider(inScale);
+});
+inScale.addEventListener('change', () => scheduleHistory());
+
+inLabelText.addEventListener('input', () => {
+  const it = firstSelected(); if (!it || selectedIds.size !== 1) return;
+  it.label.text = inLabelText.value || DEFAULT_TAG;
+  $('#label-preview-pill').textContent = it.label.text;
+  renderLabel(it);
+  scheduleHistory();
+});
+inLabelText.addEventListener('blur', () => {
+  const it = firstSelected(); if (!it) return;
+  if (!inLabelText.value.trim()){
+    it.label.text = DEFAULT_TAG;
+    inLabelText.value = DEFAULT_TAG;
+    $('#label-preview-pill').textContent = DEFAULT_TAG;
+    renderLabel(it);
+  }
+  pushHistory();
+});
+
+inLabelSize.addEventListener('input', () => {
+  const it = firstSelected(); if (!it || selectedIds.size !== 1) return;
+  it.label.size = +inLabelSize.value;
+  $('#label-size-out').textContent = it.label.size;
+  paintSlider(inLabelSize);
+  renderLabel(it);
+  scheduleHistory();
+});
+inLabelSize.addEventListener('change', () => pushHistory());
+
+$('#btn-label-center').addEventListener('click', () => {
+  const it = firstSelected(); if (!it) return;
+  const { w } = itemSize(it);
+  const lbl = labelDimensions(it);
+  it.label.dx = (w - lbl.w) / 2;
+  it.label.dy = -lbl.h - 6;
+  updateLabelPosition(it);
+  pushHistory();
+});
+$('#btn-label-hide').addEventListener('click', () => {
+  const it = firstSelected(); if (!it) return;
+  it.label.visible = false;
+  renderLabel(it);
+  pushHistory();
+  setStatus('Tag hidden');
+});
+
+$('#btn-reset-scale').addEventListener('click', () => {
+  const it = firstSelected(); if (!it) return;
+  setScale(it, 100);
+  syncInspector();
+  pushHistory();
+});
+
+function bindNum(input, fn){
+  input.addEventListener('change', () => {
+    const it = firstSelected(); if (!it || selectedIds.size !== 1) return;
+    const v = parseFloat(input.value);
+    if (!isFinite(v)){ syncInspector(); return; }
+    fn(it, v);
+    updateItemNode(it);
+    refreshLayers();
+    syncInspector();
+    pushHistory();
+  });
+}
+bindNum(inX, (it, v) => it.x = v);
+bindNum(inY, (it, v) => it.y = v);
+bindNum(inR, (it, v) => it.rot = v);
+
+$('#btn-dup').addEventListener('click', duplicateSelected);
+$('#btn-del').addEventListener('click', removeSelected);
+$('#btn-front').addEventListener('click', () => {
+  const it = firstSelected(); if (it) reorder(it.id, 'front');
+});
+$('#btn-back').addEventListener('click', () => {
+  const it = firstSelected(); if (it) reorder(it.id, 'back');
+});
+$('#btn-flip-h').addEventListener('click', () => {
+  const it = firstSelected(); if (!it) return;
+  it.flipH = !it.flipH; updateItemNode(it); pushHistory();
+});
+$('#btn-flip-v').addEventListener('click', () => {
+  const it = firstSelected(); if (!it) return;
+  it.flipV = !it.flipV; updateItemNode(it); pushHistory();
+});
+
+$('#btn-multi-dup').addEventListener('click', duplicateSelected);
+$('#btn-multi-del').addEventListener('click', removeSelected);
+$('#btn-multi-flip-h').addEventListener('click', () => {
+  selectedItems().forEach(it => { it.flipH = !it.flipH; updateItemNode(it); });
+  pushHistory();
+});
+$('#btn-multi-flip-v').addEventListener('click', () => {
+  selectedItems().forEach(it => { it.flipV = !it.flipV; updateItemNode(it); });
+  pushHistory();
+});
+
+$('#btn-undo').addEventListener('click', undo);
+$('#btn-redo').addEventListener('click', redo);
+
+/* ═══════════ ZOOM ═══════════ */
+function applyZoom(){
+  canvas.style.width = (VBW * zoom) + 'px';
+  canvas.style.height = (VBH * zoom) + 'px';
+  outline.setAttribute('stroke-width', String(2 / zoom));
+  $('#zoom-val').textContent = Math.round(zoom * 100) + '%';
+}
+
+function setZoom(z, mode){
+  zoom = clamp(z, 0.05, 3);
+  zoomMode = mode || 'manual';
+  applyZoom();
+  drawOverlay();
+}
+function zoomFit(){
+  const pad = 64;
+  setZoom(
+    Math.min(
+      (scroller.clientWidth - pad) / VBW,
+      (scroller.clientHeight - pad) / VBH
+    ),
+    'fit'
+  );
+}
+function zoomAt(clientX, clientY, factor){
+  const oldZoom = zoom;
+  const newZoom = clamp(oldZoom * factor, 0.05, 3);
+  if (Math.abs(newZoom - oldZoom) < 1e-4) return;
+
+  // SVG coord under cursor before zoom
+  const svgPt = svgPoint(clientX, clientY);
+
+  zoom = newZoom;
+  zoomMode = 'manual';
+  applyZoom();
+
+  // Force layout to be flushed
+  void canvas.offsetHeight;
+
+  // New screen position of the same SVG point
+  const m = canvas.getScreenCTM();
+  const pt = canvas.createSVGPoint();
+  pt.x = svgPt.x; pt.y = svgPt.y;
+  const screenPt = pt.matrixTransform(m);
+
+  // Adjust scroll so it stays under the cursor
+  scroller.scrollLeft += screenPt.x - clientX;
+  scroller.scrollTop  += screenPt.y - clientY;
+
+  drawOverlay();
+}
+
+$('#btn-fit').addEventListener('click', zoomFit);
+$('#btn-zoom-in').addEventListener('click', () => {
+  const r = scroller.getBoundingClientRect();
+  zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.2);
+});
+$('#btn-zoom-out').addEventListener('click', () => {
+  const r = scroller.getBoundingClientRect();
+  zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1 / 1.2);
+});
+
+scroller.addEventListener('wheel', e => {
+  if (e.ctrlKey || e.metaKey){
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+    zoomAt(e.clientX, e.clientY, factor);
+  }
+}, { passive: false });
+
+new ResizeObserver(() => {
+  if (zoomMode === 'fit') zoomFit();
+  else drawOverlay();
+}).observe(scroller);
+
+/* ═══════════ TOGGLES ═══════════ */
+$('#tgl-grid').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  const on = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', String(on));
+  gridrect.style.display = on ? '' : 'none';
+});
+$('#tgl-snap').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  const on = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', String(on));
+  snapOn = on;
+});
+$('#tgl-tags').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  const on = btn.getAttribute('aria-pressed') !== 'true';
+  btn.setAttribute('aria-pressed', String(on));
+  showTags = on;
+  items.forEach(it => renderLabel(it));
+});
+$('#bg-color').addEventListener('input', e => {
+  bgColor = e.target.value;
+  bgrect.setAttribute('fill', bgColor);
+  scheduleHistory();
+});
+$('#bg-color').addEventListener('change', () => pushHistory());
+
+/* ═══════════ EXPORT ═══════════ */
+function buildExportSVG(){
+  const out = el('svg', {
+    xmlns: NS,
+    'xmlns:xlink': 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: `0 0 ${CW} ${CH}`,
+    width: String(CW),
+    height: String(CH),
+    preserveAspectRatio: 'xMidYMid meet'
+  });
+  const title = el('title');
+  title.textContent = 'SCADA equipment layout — 1920 × 1080 landscape';
+  out.appendChild(title);
+
+  const defs = defsHost.cloneNode(true);
+  defs.removeAttribute('id');
+  out.appendChild(defs);
+
+  out.appendChild(el('rect', { x: 0, y: 0, width: CW, height: CH, fill: bgColor }));
+
+  const clip = el('clipPath', { id: 'export-clip' });
+  clip.appendChild(el('rect', { x: 0, y: 0, width: CW, height: CH }));
+  out.appendChild(clip);
+
+  const content = el('g', { 'clip-path': 'url(#export-clip)' });
+  items.forEach(it => content.appendChild(buildItem(it, true)));
+  items.forEach(it => {
+    const lbl = buildLabelExport(it);
+    if (lbl) content.appendChild(lbl);
+  });
+  out.appendChild(content);
+  return out;
+}
+
+function serializeExport(){
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+         new XMLSerializer().serializeToString(buildExportSVG());
+}
+
+function download(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2500);
+}
+
+$('#btn-svg').addEventListener('click', () => {
+  if (!assets.length){ openLoader(); return; }
+  if (!items.length && !confirm('Canvas is empty. Export a blank SVG?')) return;
+  download(new Blob([serializeExport()], { type: 'image/svg+xml;charset=utf-8' }), 'scada-layout-1920x1080.svg');
+  setStatus('Exported SVG · 1920 × 1080');
+});
+
+$('#btn-png').addEventListener('click', () => {
+  if (!assets.length){ openLoader(); return; }
+  if (!items.length && !confirm('Canvas is empty. Export a blank PNG?')) return;
+  const url = URL.createObjectURL(new Blob([serializeExport()], { type: 'image/svg+xml;charset=utf-8' }));
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = CW; c.height = CH;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.drawImage(img, 0, 0, CW, CH);
+    URL.revokeObjectURL(url);
+    c.toBlob(b => download(b, 'scada-layout-1920x1080.png'), 'image/png');
+    setStatus('Exported PNG · 1920 × 1080');
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); alert('PNG export failed — try SVG.'); };
+  img.src = url;
+});
+
+/* ═══════════ PROJECT ═══════════ */
+function projectData(){
+  return {
+    version: 6,
+    background: bgColor,
+    orientation: 'landscape',
+    width: CW, height: CH,
+    items: items.map(i => ({
+      id: i.id, assetId: i.assetId,
+      x: i.x, y: i.y, w: i.w, rot: i.rot,
+      flipH: i.flipH, flipV: i.flipV,
+      label: { ...i.label }
+    }))
+  };
+}
+
+$('#btn-save').addEventListener('click', () => {
+  download(new Blob([JSON.stringify(projectData(), null, 2)], { type: 'application/json' }), 'scada-layout-landscape.json');
+  setStatus('Project saved');
+});
+
+function applyProject(data){
+  items.forEach(it => { const n = nodeById.get(it.id); if (n) n.remove(); });
+  labelNodes.forEach(n => n.remove());
+  nodeById.clear(); labelNodes.clear();
+  items = []; selectedIds = new Set(); nextId = 1;
+
+  if (data.background){
+    bgColor = data.background;
+    bgrect.setAttribute('fill', bgColor);
+    $('#bg-color').value = bgColor;
+  }
+
+  (data.items || []).forEach(src => {
+    const a = getAsset(src.assetId); if (!a) return;
+    const it = {
+      id: nextId++, assetId: src.assetId,
+      x: +src.x || 0, y: +src.y || 0,
+      w: Math.max(MIN_W, +src.w || defaultWidth(a)),
+      rot: +src.rot || 0,
+      flipH: !!src.flipH, flipV: !!src.flipV,
+      label: {
+        text: (src.label && src.label.text) || DEFAULT_TAG,
+        dx: (src.label && +src.label.dx) || 8,
+        dy: (src.label && +src.label.dy) || -34,
+        size: (src.label && +src.label.size) || 14,
+        visible: !(src.label && src.label.visible === false)
+      }
+    };
+    items.push(it);
+    const node = buildItem(it, false);
+    scene.appendChild(node);
+    nodeById.set(it.id, node);
+    renderLabel(it);
+  });
+
+  drawOverlay(); refreshLayers(); syncInspector();
+  updateEmptyHint(); updateWarn(); updateCounts();
+}
+
+function restoreProject(){
+  let raw = null;
+  try { raw = localStorage.getItem('scadaEditor.project'); } catch (e) {}
+  if (!raw) return;
+  try { applyProject(JSON.parse(raw)); } catch (e) {}
+}
+
+$('#btn-open').addEventListener('click', () => {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.addEventListener('change', () => {
+    const f = inp.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try { applyProject(JSON.parse(r.result)); resetHistory(); setStatus('Project loaded'); }
+      catch (err) { alert('Could not read that project file.'); }
+    };
+    r.readAsText(f);
+  });
+  inp.click();
+});
+
+$('#btn-clear').addEventListener('click', () => {
+  if (items.length && !confirm('Remove all placed equipment?')) return;
+  items.forEach(it => { const n = nodeById.get(it.id); if (n) n.remove(); });
+  labelNodes.forEach(n => n.remove());
+  nodeById.clear(); labelNodes.clear();
+  items = []; selectedIds = new Set();
+  drawOverlay(); refreshLayers(); syncInspector();
+  updateEmptyHint(); updateWarn(); updateCounts();
+  pushHistory();
+  setStatus('Canvas cleared');
+});
+
+setInterval(() => {
+  try { localStorage.setItem('scadaEditor.project', JSON.stringify(projectData())); } catch (e) {}
+}, 3000);
+
+/* ═══════════ LOADER ═══════════ */
+const loader = $('#loader');
+const loadErr = $('#load-err');
+const dropZone = $('#drop-zone');
+
+function openLoader(){
+  loader.classList.remove('hidden');
+  loadErr.textContent = '';
+}
+function closeLoader(){ loader.classList.add('hidden'); }
+
+function readFile(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try { loadSource(r.result); closeLoader(); }
+    catch (err){ loadErr.textContent = err.message || String(err); }
+  };
+  r.onerror = () => { loadErr.textContent = 'Could not read that file.'; };
+  r.readAsText(file);
+}
+
+$('#file-input').addEventListener('change', e => {
+  const f = e.target.files[0]; if (f) readFile(f);
+});
+$('#btn-browse').addEventListener('click', e => { e.stopPropagation(); $('#file-input').click(); });
+
+['btn-load-file','btn-load-2','btn-load-3'].forEach(id => {
+  const b = $('#' + id);
+  if (b) b.addEventListener('click', openLoader);
+});
+
+$('#btn-cancel-load').addEventListener('click', () => {
+  if (assets.length) closeLoader();
+  else setStatus('Load cancelled — no equipment loaded');
+});
+
+dropZone.addEventListener('click', () => $('#file-input').click());
+
+['dragenter','dragover'].forEach(t => document.addEventListener(t, e => {
+  e.preventDefault(); dropZone.classList.add('over');
+}));
+['dragleave','drop'].forEach(t => document.addEventListener(t, e => {
+  e.preventDefault();
+  if (t === 'dragleave' && e.relatedTarget) return;
+  dropZone.classList.remove('over');
+}));
+document.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f) readFile(f);
+});
+
+/* ═══════════ BOOT ═══════════ */
+(async function boot(){
+  paintSlider(inScale);
+  paintSlider(inLabelSize);
+  updateHistoryUI();
+
+  try {
+    const cached = localStorage.getItem('scadaEditor.source');
+    if (cached){ loadSource(cached); closeLoader(); return; }
+  } catch (e) {}
+
+  try {
+    const res = await fetch('scada_mixers.html', { cache: 'no-store' });
+    if (res.ok){
+      const text = await res.text();
+      if (text.includes('equipment-concept')){ loadSource(text); closeLoader(); return; }
+    }
+  } catch (e) {}
+
+  openLoader();
+})();
+
+})();
+</script>
+</body>
+</html>
